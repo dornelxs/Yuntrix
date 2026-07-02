@@ -31,7 +31,7 @@ export function MinhaContaCliente({
             <input
               name="nome"
               defaultValue={perfil.nome}
-              className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+              className="input"
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -49,7 +49,7 @@ export function MinhaContaCliente({
           <button
             type="submit"
             disabled={perfilPending}
-            className="bg-primary text-on-primary font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-60"
+            className="btn btn-primary"
           >
             {perfilPending ? "Salvando..." : "Salvar alterações"}
           </button>
@@ -68,7 +68,7 @@ export function MinhaContaCliente({
               type="password"
               minLength={8}
               placeholder="Mínimo 8 caracteres"
-              className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+              className="input"
             />
           </div>
           {senhaState.erro && <p className="text-sm text-error">{senhaState.erro}</p>}
@@ -76,7 +76,7 @@ export function MinhaContaCliente({
           <button
             type="submit"
             disabled={senhaPending}
-            className="bg-primary text-on-primary font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-60"
+            className="btn btn-primary"
           >
             {senhaPending ? "Alterando..." : "Alterar senha"}
           </button>

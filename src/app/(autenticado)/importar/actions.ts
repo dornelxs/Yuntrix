@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import {
   parsearPlanilha,
@@ -208,4 +209,103 @@ export async function buscarNichosExistentes() {
   const supabase = await createClient();
   const { data } = await supabase.from("nichos").select("nome").order("nome");
   return (data ?? []).map((n) => n.nome);
+}
+
+export interface LoteImportado {
+  id: string;
+  nicho: string;
+  data_prospeccao: string;
+  total_leads: number;
+  arquivo_origem: string | null;
+  criado_em: string;
+  responsavelNome: string | null;
+}
+
+// Passe uma data YYYY-MM-DD para trazer só os lotes daquele dia de prospecção.
+// Sem argumento (ou null) traz todos.
+export async function listarLotes(dia?: string | null): Promise<LoteImportado[]> {
+  const supabase = await createClient();
+  let query = supabase
+    .from("import_batches")
+    .select(
+      "id, nicho, data_prospeccao, total_leads, arquivo_origem, criado_em, users:atribuido_a(nome)"
+    )
+    .order("criado_em", { ascending: false });
+
+  if (dia && /^\d{4}-\d{2}-\d{2}$/.test(dia)) {
+    query = query.eq("data_prospeccao", dia);
+  }
+
+  const { data } = await query;
+
+  return (data ?? []).map((b) => ({
+    id: b.id,
+    nicho: b.nicho,
+    data_prospeccao: b.data_prospeccao,
+    total_leads: b.total_leads,
+    arquivo_origem: b.arquivo_origem,
+    criado_em: b.criado_em,
+    responsavelNome: Array.isArray(b.users)
+      ? b.users[0]?.nome ?? null
+      : (b.users as unknown as { nome: string } | null)?.nome ?? null,
+  }));
+}
+
+export interface AlterarNichoState {
+  erro?: string;
+  sucesso?: boolean;
+}
+
+// Troca o nicho de um lote inteiro numa única operação: atualiza o
+// import_batches E propaga para todos os leads daquele lote (leads.nicho
+// é uma cópia, precisa ficar em sincronia com o lote).
+export async function alterarNichoLote(
+  loteId: string,
+  novoNicho: string
+): Promise<AlterarNichoState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { erro: "Sessão expirada." };
+
+  const { data: perfil } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (perfil?.role !== "admin") {
+    return { erro: "Apenas administradores podem alterar o nicho." };
+  }
+
+  const nicho = novoNicho.trim();
+  if (!nicho) return { erro: "Selecione um nicho válido." };
+
+  // Garante que o nicho existe na tabela de nichos (idempotente).
+  await supabase
+    .from("nichos")
+    .upsert({ nome: nicho }, { onConflict: "nome", ignoreDuplicates: true });
+
+  const { error: erroLote } = await supabase
+    .from("import_batches")
+    .update({ nicho })
+    .eq("id", loteId);
+  if (erroLote) return { erro: "Não foi possível alterar o nicho do lote." };
+
+  const { error: erroLeads } = await supabase
+    .from("leads")
+    .update({ nicho })
+    .eq("batch_id", loteId);
+  if (erroLeads) {
+    return {
+      erro: "Nicho do lote alterado, mas houve erro ao atualizar os leads. Tente novamente.",
+    };
+  }
+
+  revalidatePath("/importar");
+  revalidatePath("/dashboard");
+  revalidatePath("/leads");
+  revalidatePath("/nichos");
+  return { sucesso: true };
 }

@@ -44,7 +44,7 @@ export function NichosLista({ nichos }: { nichos: Nicho[] }) {
       <div className="flex justify-end">
         <button
           onClick={() => setModalAberto(true)}
-          className="px-4 py-2 bg-primary text-on-primary font-semibold rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined text-lg">add</span>
           Novo nicho
@@ -64,7 +64,7 @@ export function NichosLista({ nichos }: { nichos: Nicho[] }) {
               <button
                 onClick={() => excluir(n.id, n.nome)}
                 aria-label="Excluir nicho"
-                className="text-on-surface-variant hover:text-error"
+                className="btn-icon hover:text-error hover:bg-error-container/50"
               >
                 <span className="material-symbols-outlined text-lg">delete</span>
               </button>
@@ -84,7 +84,7 @@ export function NichosLista({ nichos }: { nichos: Nicho[] }) {
 
         <button
           onClick={() => setModalAberto(true)}
-          className="border-2 border-dashed border-outline-variant rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:text-primary transition-colors min-h-[140px]"
+          className="border-2 border-dashed border-outline-variant rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-on-surface-variant hover:border-primary hover:text-primary hover:bg-primary/5 active:scale-[0.98] transition-all cursor-pointer min-h-[140px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
         >
           <span className="material-symbols-outlined text-3xl">add_circle</span>
           <span className="text-sm font-semibold">Adicionar nicho</span>
@@ -96,7 +96,7 @@ export function NichosLista({ nichos }: { nichos: Nicho[] }) {
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-on-surface">Novo nicho</h3>
-              <button onClick={() => setModalAberto(false)} aria-label="Fechar">
+              <button onClick={() => setModalAberto(false)} aria-label="Fechar" className="btn-icon">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -109,14 +109,14 @@ export function NichosLista({ nichos }: { nichos: Nicho[] }) {
                   name="nome"
                   required
                   placeholder="Ex: Fisioterapeutas"
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
               {state.erro && <p className="text-sm text-error">{state.erro}</p>}
               <button
                 type="submit"
                 disabled={pending}
-                className="bg-primary text-on-primary font-semibold rounded-lg py-2.5 disabled:opacity-60"
+                className="btn btn-primary w-full"
               >
                 {pending ? "Criando..." : "Criar nicho"}
               </button>

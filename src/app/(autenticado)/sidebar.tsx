@@ -14,6 +14,7 @@ interface SidebarProps {
 const ITENS_MENU = [
   { href: "/dashboard", label: "Dashboard", icone: "dashboard", apenasAdmin: false, apenasFuncionario: false },
   { href: "/leads", label: "Leads", icone: "person_search", apenasAdmin: false, apenasFuncionario: false },
+  { href: "/respostas", label: "Respostas Prontas", icone: "sticky_note_2", apenasAdmin: false, apenasFuncionario: false },
   { href: "/desempenho", label: "Meu Desempenho", icone: "trending_up", apenasAdmin: false, apenasFuncionario: true },
   { href: "/financeiro", label: "Financeiro", icone: "payments", apenasAdmin: false, apenasFuncionario: true },
   { href: "/importar", label: "Importar Planilha", icone: "upload_file", apenasAdmin: true, apenasFuncionario: false },
@@ -60,13 +61,19 @@ function ConteudoMenu({
                 key={item.href}
                 href={item.href}
                 onClick={onNavegar}
+                aria-current={ativo ? "page" : undefined}
                 className={
                   ativo
-                    ? "flex items-center px-6 py-3 text-primary font-bold border-l-2 border-primary bg-primary/10"
-                    : "flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                    ? "relative flex items-center px-6 py-3 text-primary font-bold bg-primary/10 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-6 before:w-[3px] before:rounded-r-full before:bg-primary transition-colors"
+                    : "flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container-high active:bg-surface-container-highest transition-colors"
                 }
               >
-                <span className="material-symbols-outlined mr-3 text-xl">{item.icone}</span>
+                <span
+                  className="material-symbols-outlined mr-3 text-xl transition-transform"
+                  style={ativo ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {item.icone}
+                </span>
                 <span className="text-sm">{item.label}</span>
               </Link>
             );
@@ -78,7 +85,7 @@ function ConteudoMenu({
         <Link
           href="/minha-conta"
           onClick={onNavegar}
-          className="p-3 rounded-xl bg-surface-container-highest/50 flex items-center gap-3 hover:bg-surface-container-highest transition-colors"
+          className="p-3 rounded-xl bg-surface-container-highest/50 flex items-center gap-3 hover:bg-surface-container-highest active:scale-[0.98] transition-all"
         >
           <div className="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center text-sm font-bold shrink-0">
             {nome.charAt(0).toUpperCase()}
@@ -91,7 +98,7 @@ function ConteudoMenu({
         <form action={sair}>
           <button
             type="submit"
-            className="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest rounded-xl transition-colors text-sm"
+            className="w-full flex items-center gap-3 px-3 py-2 text-on-surface-variant hover:bg-surface-container-highest active:scale-[0.98] rounded-xl transition-all text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
           >
             <span className="material-symbols-outlined text-xl">logout</span>
             Sair
@@ -119,7 +126,7 @@ export function Sidebar({ nome, role }: SidebarProps) {
         <button
           onClick={() => setDrawerAberto(true)}
           aria-label="Abrir menu"
-          className="text-on-surface p-2 -ml-2"
+          className="btn-icon text-on-surface -ml-2"
         >
           <span className="material-symbols-outlined">menu</span>
         </button>

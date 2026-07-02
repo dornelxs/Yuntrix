@@ -129,7 +129,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
                 Nicho do Lead
               </label>
               <select
-                className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none"
+                className="input bg-surface"
                 value={nicho}
                 onChange={(e) => setNicho(e.target.value)}
               >
@@ -142,7 +142,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
               </select>
               {nicho === "__novo__" && (
                 <input
-                  className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none"
+                  className="input bg-surface"
                   placeholder="Nome do novo nicho"
                   value={novoNicho}
                   onChange={(e) => setNovoNicho(e.target.value)}
@@ -156,7 +156,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
               </label>
               <input
                 type="date"
-                className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none"
+                className="input bg-surface"
                 value={dataProspeccao}
                 onChange={(e) => setDataProspeccao(e.target.value)}
               />
@@ -167,7 +167,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
                 Atribuir Leads para
               </label>
               <select
-                className="w-full bg-surface border border-outline-variant rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none"
+                className="input bg-surface"
                 value={atribuidoA}
                 onChange={(e) => setAtribuidoA(e.target.value)}
               >
@@ -202,7 +202,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
                 <button
                   type="button"
                   onClick={limparTudo}
-                  className="px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors border border-outline-variant"
+                  className="btn btn-secondary"
                 >
                   Limpar Tudo
                 </button>
@@ -221,7 +221,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
                     disabled={
                       confirmPending || totalSelecionado === 0 || !nichoFinal || !atribuidoA
                     }
-                    className="px-6 py-2 text-sm font-semibold bg-primary text-on-primary hover:bg-primary/90 rounded-lg shadow-sm transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50"
+                    className="btn btn-primary"
                   >
                     <span className="material-symbols-outlined text-lg">play_arrow</span>
                     {confirmPending

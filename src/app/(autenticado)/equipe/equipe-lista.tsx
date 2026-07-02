@@ -67,7 +67,7 @@ export function EquipeLista({
       <div className="flex justify-end">
         <button
           onClick={() => setModalAberto(true)}
-          className="px-4 py-2 bg-primary text-on-primary font-semibold rounded-lg flex items-center gap-2 hover:opacity-90 transition-all"
+          className="btn btn-primary"
         >
           <span className="material-symbols-outlined text-lg">person_add</span>
           Adicionar funcionário
@@ -120,13 +120,13 @@ export function EquipeLista({
                     <div className="flex justify-end gap-3">
                       <button
                         onClick={() => alternarAtivo(u.id, u.ativo)}
-                        className="text-sm font-semibold text-primary hover:underline"
+                        className="btn btn-ghost btn-sm text-primary hover:text-primary"
                       >
                         {u.ativo ? "Desativar" : "Reativar"}
                       </button>
                       <button
                         onClick={() => excluir(u.id, u.nome)}
-                        className="text-sm font-semibold text-error hover:underline"
+                        className="btn btn-danger btn-sm"
                       >
                         Excluir
                       </button>
@@ -144,7 +144,7 @@ export function EquipeLista({
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-on-surface">Adicionar funcionário</h3>
-              <button onClick={() => setModalAberto(false)} aria-label="Fechar">
+              <button onClick={() => setModalAberto(false)} aria-label="Fechar" className="btn-icon">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -156,7 +156,7 @@ export function EquipeLista({
                 <input
                   name="nome"
                   required
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -167,7 +167,7 @@ export function EquipeLista({
                   name="email"
                   type="email"
                   required
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
               <div className="flex flex-col gap-1">
@@ -179,14 +179,14 @@ export function EquipeLista({
                   type="password"
                   required
                   minLength={8}
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
               {state.erro && <p className="text-sm text-error">{state.erro}</p>}
               <button
                 type="submit"
                 disabled={pending}
-                className="bg-primary text-on-primary font-semibold rounded-lg py-2.5 disabled:opacity-60"
+                className="btn btn-primary w-full"
               >
                 {pending ? "Criando..." : "Criar acesso"}
               </button>

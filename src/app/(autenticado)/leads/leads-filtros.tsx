@@ -70,7 +70,7 @@ export function LeadsFiltros({
     <div className="bg-white border border-outline-variant rounded-xl p-4 shadow-sm">
       <div className="flex flex-col sm:flex-row gap-3">
         <input
-          className="flex-1 bg-surface-container-low border border-outline-variant rounded-lg px-4 py-2 text-sm focus:border-primary outline-none"
+          className="input flex-1 bg-surface-container-low"
           placeholder="Buscar por nome, telefone ou Instagram"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
@@ -84,7 +84,7 @@ export function LeadsFiltros({
             Status
           </label>
           <select
-            className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-sm outline-none"
+            className="input bg-white"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -102,7 +102,7 @@ export function LeadsFiltros({
             Nicho
           </label>
           <select
-            className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-sm outline-none"
+            className="input bg-white"
             value={nicho}
             onChange={(e) => setNicho(e.target.value)}
           >
@@ -120,7 +120,7 @@ export function LeadsFiltros({
             Prioridade
           </label>
           <select
-            className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-sm outline-none"
+            className="input bg-white"
             value={prioridade}
             onChange={(e) => setPrioridade(e.target.value)}
           >
@@ -139,7 +139,7 @@ export function LeadsFiltros({
               Responsável
             </label>
             <select
-              className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-sm outline-none"
+              className="input bg-white"
               value={responsavel}
               onChange={(e) => setResponsavel(e.target.value)}
             >
@@ -156,13 +156,13 @@ export function LeadsFiltros({
         <div className="flex items-center gap-2">
           <button
             onClick={aplicarFiltros}
-            className="flex-1 px-4 py-2 bg-secondary-container text-on-secondary-container font-semibold rounded-lg hover:bg-secondary-fixed transition-colors text-sm"
+            className="btn btn-primary flex-1"
           >
             Filtrar
           </button>
           <button
             onClick={limparFiltros}
-            className="px-4 py-2 text-error font-semibold hover:bg-error-container rounded-lg transition-colors text-sm"
+            className="btn btn-danger"
           >
             Limpar
           </button>
@@ -182,8 +182,12 @@ export function LeadsFiltros({
               {ROTULO_FILTRO[chave] ?? chave}:{" "}
               {chave === "responsavel" ? nomeFuncionario(valor) : valor}
             </span>
-            <button onClick={() => removerFiltro(chave)} aria-label={`Remover filtro ${chave}`}>
-              <span className="material-symbols-outlined text-base cursor-pointer">close</span>
+            <button
+              onClick={() => removerFiltro(chave)}
+              aria-label={`Remover filtro ${chave}`}
+              className="btn-icon p-0.5 hover:bg-black/10"
+            >
+              <span className="material-symbols-outlined text-base">close</span>
             </button>
           </div>
         ))}

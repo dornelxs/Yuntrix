@@ -29,8 +29,8 @@ export function FinanceiroCliente({
           onClick={() => router.push("/financeiro?periodo=semanal")}
           className={
             periodo === "semanal"
-              ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold"
-              : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold"
+              ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold cursor-pointer transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
+              : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold cursor-pointer transition-all hover:bg-surface-container-high active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
           }
         >
           Semanal
@@ -39,8 +39,8 @@ export function FinanceiroCliente({
           onClick={() => router.push("/financeiro?periodo=mensal")}
           className={
             periodo === "mensal"
-              ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold"
-              : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold"
+              ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold cursor-pointer transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
+              : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold cursor-pointer transition-all hover:bg-surface-container-high active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
           }
         >
           Mensal

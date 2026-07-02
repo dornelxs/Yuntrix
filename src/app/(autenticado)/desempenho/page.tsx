@@ -57,7 +57,7 @@ export default async function DesempenhoPage({ searchParams }: DesempenhoPagePro
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
-      <header className="h-14 lg:h-16 px-4 lg:px-8 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-40 border-b border-outline-variant">
+      <header className="min-h-14 lg:h-16 py-2 lg:py-0 px-4 lg:px-8 flex items-center justify-between sticky top-14 lg:top-0 bg-surface/80 backdrop-blur-md z-40 border-b border-outline-variant">
         <div>
           <h2 className="text-xl font-bold text-on-surface">Meu desempenho</h2>
         </div>

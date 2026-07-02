@@ -164,10 +164,10 @@ export function DetalheLeadCliente({
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
-      <header className="h-14 lg:h-16 px-4 lg:px-8 flex items-center justify-between sticky top-0 bg-surface/80 backdrop-blur-md z-40 border-b border-outline-variant">
+      <header className="min-h-14 lg:h-16 py-2 lg:py-0 px-4 lg:px-8 flex items-center justify-between sticky top-14 lg:top-0 bg-surface/80 backdrop-blur-md z-40 border-b border-outline-variant">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-on-surface"
+          className="btn btn-ghost btn-sm"
         >
           <span className="material-symbols-outlined">arrow_back</span>
           Voltar
@@ -224,11 +224,16 @@ export function DetalheLeadCliente({
                 onClick={() => mudarStatus(s)}
                 className={
                   s === statusAtual
-                    ? "border-2 border-primary bg-primary/10 rounded-lg p-4 flex flex-col items-center gap-1 text-primary font-semibold"
-                    : "border border-outline-variant rounded-lg p-4 flex flex-col items-center gap-1 text-on-surface-variant hover:border-primary transition-colors disabled:opacity-50"
+                    ? "border-2 border-primary bg-primary/10 rounded-lg p-4 flex flex-col items-center gap-1 text-primary font-semibold cursor-pointer transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
+                    : "border border-outline-variant rounded-lg p-4 flex flex-col items-center gap-1 text-on-surface-variant hover:border-primary hover:bg-primary/5 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
                 }
               >
-                <span className="material-symbols-outlined">{ICONE_STATUS[s]}</span>
+                <span
+                  className="material-symbols-outlined"
+                  style={s === statusAtual ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                >
+                  {ICONE_STATUS[s]}
+                </span>
                 <span className="text-sm">{STATUS_LABEL[s]}</span>
               </button>
             ))}
@@ -251,13 +256,13 @@ export function DetalheLeadCliente({
                   value={valorNegociado}
                   onChange={(e) => setValorNegociado(e.target.value)}
                   placeholder="0,00"
-                  className="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-lg text-sm focus:border-primary outline-none"
+                  className="input pl-10"
                 />
               </div>
               <button
                 onClick={salvarValor}
                 disabled={salvandoValor}
-                className="px-4 py-2 bg-primary text-on-primary text-sm font-semibold rounded-lg disabled:opacity-60"
+                className="btn btn-primary"
               >
                 {salvandoValor ? "Salvando..." : "Salvar"}
               </button>
@@ -291,7 +296,7 @@ export function DetalheLeadCliente({
                   <h3 className="text-sm font-semibold text-on-surface">{m.titulo}</h3>
                   <button
                     onClick={() => copiar(m.texto!, m.chave)}
-                    className="text-primary hover:text-primary/80 shrink-0"
+                    className={`btn-icon shrink-0 p-1.5 ${copiado === m.chave ? "text-green-600" : "text-primary hover:text-primary"}`}
                     aria-label="Copiar mensagem"
                   >
                     <span className="material-symbols-outlined text-lg">
@@ -314,13 +319,13 @@ export function DetalheLeadCliente({
               name="nota"
               rows={3}
               placeholder="Ex: Cliente pediu pra ligar semana que vem"
-              className="w-full border border-outline-variant rounded-lg px-4 py-2.5 text-sm focus:border-primary outline-none resize-none"
+              className="input resize-none"
             />
             {notaState.erro && <p className="text-sm text-error">{notaState.erro}</p>}
             <button
               type="submit"
               disabled={notaPending}
-              className="self-end px-4 py-2 bg-primary text-on-primary text-sm font-semibold rounded-lg disabled:opacity-60"
+              className="btn btn-primary self-end"
             >
               {notaPending ? "Salvando..." : "Salvar nota"}
             </button>
@@ -345,19 +350,19 @@ export function DetalheLeadCliente({
                           value={textoEdicao}
                           onChange={(e) => setTextoEdicao(e.target.value)}
                           rows={2}
-                          className="w-full border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none resize-none"
+                          className="input resize-none"
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={() => salvarEdicao(a.id)}
                             disabled={pending}
-                            className="px-3 py-1 bg-primary text-on-primary text-xs font-semibold rounded-lg disabled:opacity-60"
+                            className="btn btn-primary btn-sm"
                           >
                             Salvar
                           </button>
                           <button
                             onClick={() => setEditandoId(null)}
-                            className="px-3 py-1 text-on-surface-variant text-xs font-semibold rounded-lg"
+                            className="btn btn-ghost btn-sm"
                           >
                             Cancelar
                           </button>
@@ -371,7 +376,7 @@ export function DetalheLeadCliente({
                             <button
                               onClick={() => iniciarEdicao(a.id, a.nota_texto ?? "")}
                               aria-label="Editar nota"
-                              className="text-on-surface-variant hover:text-primary"
+                              className="btn-icon p-1.5 hover:text-primary"
                             >
                               <span className="material-symbols-outlined text-base">edit</span>
                             </button>
@@ -379,7 +384,7 @@ export function DetalheLeadCliente({
                               onClick={() => removerNota(a.id)}
                               disabled={excluindoId === a.id}
                               aria-label="Excluir nota"
-                              className="text-on-surface-variant hover:text-error disabled:opacity-50"
+                              className="btn-icon p-1.5 hover:text-error hover:bg-error-container/50 disabled:opacity-50"
                             >
                               <span className="material-symbols-outlined text-base">delete</span>
                             </button>

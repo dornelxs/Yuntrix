@@ -31,7 +31,7 @@ export function NovoLeadBotao({
     <>
       <button
         onClick={() => setModalAberto(true)}
-        className="px-4 py-2 bg-primary text-on-primary font-semibold rounded-lg flex items-center gap-2 hover:opacity-90 transition-all text-sm"
+        className="btn btn-primary"
       >
         <span className="material-symbols-outlined text-lg">add</span>
         Novo Lead
@@ -42,7 +42,7 @@ export function NovoLeadBotao({
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-on-surface">Novo lead</h3>
-              <button onClick={() => setModalAberto(false)} aria-label="Fechar">
+              <button onClick={() => setModalAberto(false)} aria-label="Fechar" className="btn-icon">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
@@ -54,7 +54,7 @@ export function NovoLeadBotao({
                 <input
                   name="nome"
                   required
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
 
@@ -67,7 +67,7 @@ export function NovoLeadBotao({
                   list="nichos-existentes"
                   required
                   placeholder="Ex: Psicólogos"
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
                 <datalist id="nichos-existentes">
                   {nichos.map((n) => (
@@ -83,7 +83,7 @@ export function NovoLeadBotao({
                 <input
                   name="telefone"
                   placeholder="(00) 00000-0000"
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
 
@@ -94,7 +94,7 @@ export function NovoLeadBotao({
                 <input
                   name="instagram"
                   placeholder="@usuario"
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
 
@@ -108,7 +108,7 @@ export function NovoLeadBotao({
                 </label>
                 <input
                   name="especialidade"
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                  className="input"
                 />
               </div>
 
@@ -119,7 +119,7 @@ export function NovoLeadBotao({
                 <textarea
                   name="pontoDeDor"
                   rows={2}
-                  className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none resize-none"
+                  className="input resize-none"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export function NovoLeadBotao({
                   <select
                     name="atribuidoA"
                     required
-                    className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none"
+                    className="input"
                   >
                     <option value="">Selecione...</option>
                     {funcionarios.map((f) => (
@@ -148,7 +148,7 @@ export function NovoLeadBotao({
               <button
                 type="submit"
                 disabled={pending}
-                className="bg-primary text-on-primary font-semibold rounded-lg py-2.5 disabled:opacity-60"
+                className="btn btn-primary w-full"
               >
                 {pending ? "Criando..." : "Criar lead"}
               </button>

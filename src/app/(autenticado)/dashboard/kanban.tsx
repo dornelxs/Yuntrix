@@ -27,6 +27,8 @@ interface KanbanProps {
   nichos: string[];
   funcionarios: { id: string; nome: string }[];
   isAdmin: boolean;
+  dataSelecionada: string;
+  hoje: string;
 }
 
 function horasDesde(dataIso: string): number {
@@ -40,7 +42,14 @@ function tempoParado(dataIso: string): string {
   return `há ${Math.floor(horas / 24)}d`;
 }
 
-export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanProps) {
+export function Kanban({
+  leadsIniciais,
+  nichos,
+  funcionarios,
+  isAdmin,
+  dataSelecionada,
+  hoje,
+}: KanbanProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -51,6 +60,17 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
     else sp.delete(chave);
     router.push(`/dashboard?${sp.toString()}`);
   }
+
+  // Formata YYYY-MM-DD -> "02 de jul" para o rótulo, sem sofrer com fuso.
+  function rotuloData(ymd: string): string {
+    const [ano, mes, dia] = ymd.split("-").map(Number);
+    return new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+    });
+  }
+
+  const isHoje = dataSelecionada === hoje;
 
   function moverStatus(leadId: string, atual: StatusLead, direcao: 1 | -1) {
     const indice = STATUS_LEAD.indexOf(atual);
@@ -64,9 +84,30 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-on-surface-variant text-xl">
+            calendar_today
+          </span>
+          <input
+            type="date"
+            value={dataSelecionada}
+            max={hoje}
+            onChange={(e) => aplicarFiltro("data", e.target.value)}
+            className="input bg-white w-auto"
+          />
+          {!isHoje && (
+            <button
+              onClick={() => aplicarFiltro("data", "")}
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Hoje
+            </button>
+          )}
+        </div>
+
         <select
-          className="bg-white border border-outline-variant rounded-lg px-4 py-2 text-sm outline-none"
+          className="input bg-white w-auto"
           value={searchParams.get("nicho") ?? ""}
           onChange={(e) => aplicarFiltro("nicho", e.target.value)}
         >
@@ -79,7 +120,7 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
         </select>
         {isAdmin && (
           <select
-            className="bg-white border border-outline-variant rounded-lg px-4 py-2 text-sm outline-none"
+            className="input bg-white w-auto"
             value={searchParams.get("responsavel") ?? ""}
             onChange={(e) => aplicarFiltro("responsavel", e.target.value)}
           >
@@ -92,6 +133,14 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
           </select>
         )}
       </div>
+
+      <p className="text-sm text-on-surface-variant">
+        Mostrando leads importados{" "}
+        <span className="font-semibold text-on-surface">
+          {isHoje ? "hoje" : `em ${rotuloData(dataSelecionada)}`}
+        </span>{" "}
+        · {leadsIniciais.length} {leadsIniciais.length === 1 ? "lead" : "leads"}
+      </p>
 
       <div className="flex lg:grid lg:grid-cols-5 gap-4 overflow-x-auto pb-2 -mx-4 lg:mx-0 snap-x snap-mandatory lg:snap-none">
         {STATUS_LEAD.map((status) => {
@@ -120,8 +169,8 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
                       key={lead.id}
                       className={
                         inativo
-                          ? "bg-amber-50 border border-amber-300 rounded-lg p-3 shadow-sm"
-                          : "bg-white border border-outline-variant rounded-lg p-3 shadow-sm"
+                          ? "bg-amber-50 border border-amber-300 rounded-lg p-3 shadow-sm transition-all hover:shadow-md hover:border-amber-400"
+                          : "bg-white border border-outline-variant rounded-lg p-3 shadow-sm transition-all hover:shadow-md hover:border-outline"
                       }
                     >
                       <div className="flex justify-between items-start gap-2">
@@ -155,7 +204,7 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
                           <button
                             disabled={pending}
                             onClick={() => moverStatus(lead.id, status, -1)}
-                            className="flex-1 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-high rounded py-1 transition-colors disabled:opacity-50"
+                            className="flex-1 text-xs font-semibold text-on-surface-variant hover:bg-surface-container-high rounded py-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
                           >
                             ← Voltar
                           </button>
@@ -164,7 +213,7 @@ export function Kanban({ leadsIniciais, nichos, funcionarios, isAdmin }: KanbanP
                           <button
                             disabled={pending}
                             onClick={() => moverStatus(lead.id, status, 1)}
-                            className="flex-1 text-xs font-semibold text-primary hover:bg-primary/10 rounded py-1 transition-colors disabled:opacity-50"
+                            className="flex-1 text-xs font-semibold text-primary hover:bg-primary/10 rounded py-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
                           >
                             Avançar →
                           </button>

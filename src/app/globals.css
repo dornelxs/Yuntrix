@@ -50,8 +50,8 @@
   --color-on-background: #141b2b;
   --color-surface-variant: #dce2f7;
 
-  /* Tipografia */
-  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  /* Tipografia — Inter via next/font (variável --font-inter injetada no <html>) */
+  --font-sans: var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif;
 
   /* Raio de borda */
   --radius-sm: 0.25rem;
@@ -82,4 +82,79 @@ body {
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* ============================================================
+   Sistema de botões — feedback tátil consistente
+   Todo botão dá "sensação de clique": active:scale + transição
+   rápida + halo de foco acessível (só teclado, via focus-visible).
+   ============================================================ */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+      px-4 py-2.5 text-sm font-semibold cursor-pointer select-none
+      transition-[transform,background-color,border-color,box-shadow,opacity]
+      duration-150 ease-out
+      active:scale-[0.97]
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-primary-fixed focus-visible:ring-offset-1
+      focus-visible:ring-offset-surface
+      disabled:opacity-60 disabled:pointer-events-none;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-on-primary shadow-sm
+      hover:bg-on-primary-fixed-variant
+      active:bg-on-primary-fixed-variant;
+  }
+
+  .btn-secondary {
+    @apply bg-surface-container-lowest text-on-surface
+      border border-outline-variant
+      hover:bg-surface-container-high hover:border-outline;
+  }
+
+  .btn-ghost {
+    @apply text-on-surface-variant
+      hover:bg-surface-container-high hover:text-on-surface;
+  }
+
+  .btn-danger {
+    @apply text-error hover:bg-error-container/60 active:bg-error-container;
+  }
+
+  /* Botão só de ícone (fechar, copiar, editar) */
+  .btn-icon {
+    @apply inline-flex items-center justify-center rounded-lg p-2
+      cursor-pointer text-on-surface-variant
+      transition-[transform,background-color,color] duration-150 ease-out
+      active:scale-90
+      hover:bg-surface-container-high hover:text-on-surface
+      focus-visible:outline-none focus-visible:ring-2
+      focus-visible:ring-primary-fixed;
+  }
+
+  /* Card — Nível 1 de elevação */
+  .card {
+    @apply bg-surface-container-lowest border border-outline-variant
+      rounded-xl shadow-sm;
+  }
+  .card-hover {
+    @apply transition-[border-color,box-shadow] duration-150
+      hover:border-outline hover:shadow-md;
+  }
+
+  /* Input — foco com halo azul */
+  .input {
+    @apply w-full bg-surface-container-lowest border border-outline-variant
+      rounded-lg px-3 py-2.5 text-sm text-on-surface
+      placeholder:text-outline
+      transition-[border-color,box-shadow] duration-150
+      focus:border-primary focus:outline-none
+      focus:ring-2 focus:ring-primary-fixed;
+  }
 }

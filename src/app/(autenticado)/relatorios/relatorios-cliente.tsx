@@ -186,8 +186,8 @@ export function RelatoriosCliente({
             onClick={() => mudarPeriodo(p)}
             className={
               periodo === p
-                ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold"
-                : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold"
+                ? "px-4 py-1.5 bg-primary text-on-primary rounded-full text-sm font-semibold cursor-pointer transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
+                : "px-4 py-1.5 bg-surface-container-low text-on-surface-variant rounded-full text-sm font-semibold cursor-pointer transition-all hover:bg-surface-container-high active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed"
             }
           >
             {p === "semanal" ? "Últimos 7 dias" : "Últimos 30 dias"}
@@ -225,7 +225,7 @@ export function RelatoriosCliente({
           </div>
           <button
             onClick={exportarNichos}
-            className="px-4 py-2 border border-outline-variant rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">download</span>
             Exportar CSV
@@ -269,7 +269,7 @@ export function RelatoriosCliente({
           <h3 className="text-lg font-semibold text-on-surface">Performance por funcionário</h3>
           <button
             onClick={exportarFuncionarios}
-            className="px-4 py-2 border border-outline-variant rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">download</span>
             Exportar CSV
@@ -317,7 +317,7 @@ export function RelatoriosCliente({
           <h3 className="text-lg font-semibold text-on-surface">Lotes de importação</h3>
           <button
             onClick={exportarLotes}
-            className="px-4 py-2 border border-outline-variant rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">download</span>
             Exportar CSV
@@ -401,7 +401,7 @@ export function RelatoriosCliente({
           </div>
           <button
             onClick={() => setEditandoPercentual((v) => !v)}
-            className="px-4 py-2 border border-outline-variant rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-surface-container"
+            className="btn btn-secondary"
           >
             <span className="material-symbols-outlined text-lg">settings</span>
             Configurar comissão
@@ -424,13 +424,13 @@ export function RelatoriosCliente({
                 min={0}
                 max={100}
                 defaultValue={financeiro.percentualComissao}
-                className="border border-outline-variant rounded-lg px-3 py-2 text-sm focus:border-primary outline-none w-32"
+                className="input w-32"
               />
             </div>
             <button
               type="submit"
               disabled={configPending}
-              className="px-4 py-2 bg-primary text-on-primary text-sm font-semibold rounded-lg disabled:opacity-60"
+              className="btn btn-primary"
             >
               {configPending ? "Salvando..." : "Salvar"}
             </button>
