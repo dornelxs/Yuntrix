@@ -202,7 +202,7 @@ export function RelatoriosCliente({
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <CardMetrica titulo="Total de leads" valor={visaoGeral.totalLeads} />
           <CardMetrica titulo="Contatos realizados" valor={visaoGeral.totalContatos} />
-          <CardMetrica titulo="Conversões" valor={visaoGeral.totalConversoes} cor="text-green-700" />
+          <CardMetrica titulo="Conversões" valor={visaoGeral.totalConversoes} cor="text-green-400" />
           <CardMetrica
             titulo="Taxa de conversão geral"
             valor={`${visaoGeral.taxaConversaoGeral.toFixed(1)}%`}
@@ -215,7 +215,7 @@ export function RelatoriosCliente({
         </div>
       </section>
 
-      <section className="bg-white border border-outline-variant rounded-2xl p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h3 className="text-lg font-semibold text-on-surface">Conversão por nicho</h3>
@@ -277,7 +277,7 @@ export function RelatoriosCliente({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {performanceFuncionarios.map((f) => (
-            <div key={f.id} className="bg-white border border-outline-variant rounded-2xl p-5">
+            <div key={f.id} className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
               <h4 className="font-semibold text-on-surface mb-3">{f.nome}</h4>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
@@ -286,7 +286,7 @@ export function RelatoriosCliente({
                 </div>
                 <div>
                   <p className="text-[10px] uppercase text-on-surface-variant">Conversão</p>
-                  <p className="text-lg font-bold text-green-700">
+                  <p className="text-lg font-bold text-green-400">
                     {f.taxaConversao.toFixed(1)}%
                   </p>
                 </div>
@@ -312,7 +312,7 @@ export function RelatoriosCliente({
         </div>
       </section>
 
-      <section className="bg-white border border-outline-variant rounded-2xl p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-on-surface">Lotes de importação</h3>
           <button
@@ -349,7 +349,7 @@ export function RelatoriosCliente({
                     <span
                       className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
                         l.status === "concluido"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-500/15 text-green-400"
                           : "bg-secondary-container text-on-secondary-container"
                       }`}
                     >
@@ -370,7 +370,7 @@ export function RelatoriosCliente({
         </div>
       </section>
 
-      <section className="bg-white border border-outline-variant rounded-2xl p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <h3 className="text-lg font-semibold text-on-surface mb-4">Atividade por dia</h3>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={atividadeDiaria}>
@@ -391,7 +391,7 @@ export function RelatoriosCliente({
         </ResponsiveContainer>
       </section>
 
-      <section className="bg-white border border-outline-variant rounded-2xl p-6">
+      <section className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h3 className="text-lg font-semibold text-on-surface">Financeiro</h3>
@@ -443,7 +443,7 @@ export function RelatoriosCliente({
           <CardMetrica
             titulo={`Comissão total (${financeiro.percentualComissao}%)`}
             valor={formatarMoeda(financeiro.comissaoTotal)}
-            cor="text-green-700"
+            cor="text-green-400"
           />
           <CardMetrica
             titulo="Funcionários com vendas"
@@ -475,7 +475,7 @@ export function RelatoriosCliente({
                     </Link>
                   </td>
                   <td className="py-3 text-sm">{formatarMoeda(f.total)}</td>
-                  <td className="py-3 text-sm text-green-700 font-semibold">
+                  <td className="py-3 text-sm text-green-400 font-semibold">
                     {formatarMoeda(f.comissao)}
                   </td>
                 </tr>
@@ -505,7 +505,7 @@ function CardMetrica({
   cor?: string;
 }) {
   return (
-    <div className="bg-white border border-outline-variant rounded-2xl p-5">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
       <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">{titulo}</p>
       <p className={`text-2xl font-bold ${cor}`}>{valor}</p>
     </div>

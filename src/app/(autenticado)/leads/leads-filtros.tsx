@@ -67,7 +67,7 @@ export function LeadsFiltros({
   const nomeFuncionario = (id: string) => funcionarios.find((f) => f.id === id)?.nome ?? id;
 
   return (
-    <div className="bg-white border border-outline-variant rounded-xl p-4 shadow-sm">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
       <div className="flex flex-col sm:flex-row gap-3">
         <input
           className="input flex-1 bg-surface-container-low"
@@ -84,7 +84,7 @@ export function LeadsFiltros({
             Status
           </label>
           <select
-            className="input bg-white"
+            className="input bg-surface-container-lowest"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -102,7 +102,7 @@ export function LeadsFiltros({
             Nicho
           </label>
           <select
-            className="input bg-white"
+            className="input bg-surface-container-lowest"
             value={nicho}
             onChange={(e) => setNicho(e.target.value)}
           >
@@ -120,7 +120,7 @@ export function LeadsFiltros({
             Prioridade
           </label>
           <select
-            className="input bg-white"
+            className="input bg-surface-container-lowest"
             value={prioridade}
             onChange={(e) => setPrioridade(e.target.value)}
           >
@@ -139,7 +139,7 @@ export function LeadsFiltros({
               Responsável
             </label>
             <select
-              className="input bg-white"
+              className="input bg-surface-container-lowest"
               value={responsavel}
               onChange={(e) => setResponsavel(e.target.value)}
             >

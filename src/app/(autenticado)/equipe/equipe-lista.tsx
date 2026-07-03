@@ -74,7 +74,7 @@ export function EquipeLista({
         </button>
       </div>
 
-      <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left border-collapse">
           <thead className="bg-surface-container-low border-b border-outline-variant">
             <tr>
@@ -107,7 +107,7 @@ export function EquipeLista({
                 </td>
                 <td className="px-6 py-3">
                   <span
-                    className={`flex items-center gap-1.5 text-sm ${u.ativo ? "text-green-700" : "text-on-surface-variant"}`}
+                    className={`flex items-center gap-1.5 text-sm ${u.ativo ? "text-green-400" : "text-on-surface-variant"}`}
                   >
                     <span
                       className={`w-2 h-2 rounded-full ${u.ativo ? "bg-green-500" : "bg-outline"}`}
@@ -140,8 +140,8 @@ export function EquipeLista({
       </div>
 
       {modalAberto && createPortal(
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
+        <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-on-surface">Adicionar funcionário</h3>
               <button onClick={() => setModalAberto(false)} aria-label="Fechar" className="btn-icon">

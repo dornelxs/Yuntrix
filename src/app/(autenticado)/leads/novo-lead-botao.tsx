@@ -38,8 +38,8 @@ export function NovoLeadBotao({
       </button>
 
       {modalAberto && createPortal(
-        <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
+        <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
+          <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-on-surface">Novo lead</h3>
               <button onClick={() => setModalAberto(false)} aria-label="Fechar" className="btn-icon">

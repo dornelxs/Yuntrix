@@ -126,7 +126,7 @@ export function RespostasLista({
           <select
             value={filtroStatus}
             onChange={(e) => setFiltroStatus(e.target.value)}
-            className="input bg-white"
+            className="input bg-surface-container-lowest"
           >
             <option value="todos">Todas</option>
             <option value="sem_status">Sem etapa</option>
@@ -228,8 +228,8 @@ export function RespostasLista({
       {/* Modal criar/editar */}
       {modalAberto &&
         createPortal(
-          <div className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-lg my-auto">
+          <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
+            <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-lg shadow-lg my-auto">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-on-surface">
                   {emEdicao ? "Editar resposta" : "Nova resposta"}
@@ -262,7 +262,7 @@ export function RespostasLista({
                   <select
                     name="statusRelacionado"
                     defaultValue={emEdicao?.status_relacionado ?? ""}
-                    className="input bg-white"
+                    className="input bg-surface-container-lowest"
                   >
                     <option value="">Sem etapa específica</option>
                     {STATUS_LEAD.map((s) => (

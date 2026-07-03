@@ -21,7 +21,7 @@ export function MinhaContaCliente({
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-outline-variant rounded-2xl p-6 space-y-4">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 space-y-4">
         <h3 className="text-lg font-semibold text-on-surface">Informações pessoais</h3>
         <form action={perfilAction} className="space-y-4 max-w-sm">
           <div className="flex flex-col gap-1">
@@ -45,7 +45,7 @@ export function MinhaContaCliente({
             />
           </div>
           {perfilState.erro && <p className="text-sm text-error">{perfilState.erro}</p>}
-          {perfilState.sucesso && <p className="text-sm text-green-700">Alterações salvas.</p>}
+          {perfilState.sucesso && <p className="text-sm text-green-400">Alterações salvas.</p>}
           <button
             type="submit"
             disabled={perfilPending}
@@ -56,7 +56,7 @@ export function MinhaContaCliente({
         </form>
       </div>
 
-      <div className="bg-white border border-outline-variant rounded-2xl p-6 space-y-4">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 space-y-4">
         <h3 className="text-lg font-semibold text-on-surface">Segurança</h3>
         <form action={senhaAction} className="space-y-4 max-w-sm">
           <div className="flex flex-col gap-1">
@@ -72,7 +72,7 @@ export function MinhaContaCliente({
             />
           </div>
           {senhaState.erro && <p className="text-sm text-error">{senhaState.erro}</p>}
-          {senhaState.sucesso && <p className="text-sm text-green-700">Senha alterada com sucesso.</p>}
+          {senhaState.sucesso && <p className="text-sm text-green-400">Senha alterada com sucesso.</p>}
           <button
             type="submit"
             disabled={senhaPending}

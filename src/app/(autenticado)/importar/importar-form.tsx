@@ -83,7 +83,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
     <div className="grid grid-cols-12 gap-8">
       {/* Coluna esquerda: configurações */}
       <section className="col-span-12 lg:col-span-4 space-y-6">
-        <div className="bg-white border border-outline-variant rounded-2xl p-6 space-y-6 shadow-sm">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 space-y-6 shadow-sm">
           <h4 className="text-lg font-semibold text-on-surface border-b border-outline-variant pb-4">
             Configurações
           </h4>
@@ -187,7 +187,7 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
 
       {/* Coluna direita: preview */}
       <section className="col-span-12 lg:col-span-8 flex flex-col space-y-6">
-        <div className="bg-white border border-outline-variant rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 bg-surface border-b border-outline-variant flex justify-between items-center flex-wrap gap-3">
             <div>
               <h3 className="text-lg font-semibold text-on-surface">Preview dos Dados</h3>

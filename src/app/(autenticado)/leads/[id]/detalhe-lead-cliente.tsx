@@ -191,7 +191,7 @@ export function DetalheLeadCliente({
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1"
+                  className="px-3 py-1 bg-green-500/15 text-green-400 rounded-full text-xs font-semibold flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-base">chat</span>
                   WhatsApp
@@ -202,7 +202,7 @@ export function DetalheLeadCliente({
                   href={`https://instagram.com/${lead.instagram.replace("@", "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-semibold flex items-center gap-1"
+                  className="px-3 py-1 bg-pink-500/15 text-pink-400 rounded-full text-xs font-semibold flex items-center gap-1"
                 >
                   <span className="material-symbols-outlined text-base">photo_camera</span>
                   Instagram
@@ -290,7 +290,7 @@ export function DetalheLeadCliente({
             .map((m) => (
               <div
                 key={m.chave}
-                className="border border-outline-variant rounded-lg p-4 bg-white"
+                className="border border-outline-variant rounded-lg p-4 bg-surface-container-lowest"
               >
                 <div className="flex justify-between items-start gap-2 mb-1">
                   <h3 className="text-sm font-semibold text-on-surface">{m.titulo}</h3>

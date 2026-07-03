@@ -58,12 +58,12 @@ export function DesempenhoCliente({
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <CardMetrica titulo="Leads atribuídos" valor={metricas.leadsAtribuidos} cor="text-primary" />
         <CardMetrica titulo="Contatos realizados" valor={metricas.contatados} cor="text-primary" />
-        <CardMetrica titulo="Interessados gerados" valor={metricas.interessados} cor="text-amber-600" />
-        <CardMetrica titulo="Conversões (fechados)" valor={metricas.fechados} cor="text-green-700" />
+        <CardMetrica titulo="Interessados gerados" valor={metricas.interessados} cor="text-amber-400" />
+        <CardMetrica titulo="Conversões (fechados)" valor={metricas.fechados} cor="text-green-400" />
         <CardMetrica
           titulo="Taxa de conversão"
           valor={`${metricas.taxaConversao.toFixed(1)}%`}
-          cor={metricas.taxaConversao >= 10 ? "text-green-700" : "text-on-surface"}
+          cor={metricas.taxaConversao >= 10 ? "text-green-400" : "text-on-surface"}
         />
         <CardMetrica
           titulo="Leads inativos (+48h)"
@@ -72,7 +72,7 @@ export function DesempenhoCliente({
         />
       </div>
 
-      <div className="bg-white border border-outline-variant rounded-2xl p-6">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-on-surface mb-3">Meu funil simplificado</h3>
         <div className="space-y-2">
           <BarraFunil rotulo="Atribuídos" valor={metricas.leadsAtribuidos} total={metricas.leadsAtribuidos} />
@@ -82,7 +82,7 @@ export function DesempenhoCliente({
         </div>
       </div>
 
-      <div className="bg-white border border-outline-variant rounded-2xl p-6">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-on-surface mb-3">Histórico de atividade</h3>
         <ul className="space-y-2">
           {atividadesRecentes.map((a, i) => (
@@ -114,7 +114,7 @@ function CardMetrica({
   cor?: string;
 }) {
   return (
-    <div className="bg-white border border-outline-variant rounded-2xl p-5">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
       <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">{titulo}</p>
       <p className={`text-2xl font-bold ${cor}`}>{valor}</p>
     </div>

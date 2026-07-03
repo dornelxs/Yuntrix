@@ -148,7 +148,7 @@ export function Sidebar({ nome, role }: SidebarProps) {
         createPortal(
           <div className="lg:hidden fixed inset-0 z-50 flex">
             <div
-              className="fixed inset-0 bg-black/40"
+              className="fixed inset-0 bg-black/60"
               onClick={() => setDrawerAberto(false)}
             />
             <aside className="relative w-[260px] max-w-[80vw] h-full bg-surface-container-low flex flex-col justify-between py-6 shadow-xl">

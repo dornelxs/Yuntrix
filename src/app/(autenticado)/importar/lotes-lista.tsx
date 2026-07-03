@@ -85,7 +85,7 @@ export function LotesLista({
           value={dataSelecionada ?? ""}
           max={hoje}
           onChange={(e) => filtrarPorData(e.target.value)}
-          className="input bg-white w-auto"
+          className="input bg-surface-container-lowest w-auto"
         />
       </div>
       <button
@@ -148,7 +148,7 @@ export function LotesLista({
               return (
                 <div
                   key={lote.id}
-                  className="bg-white border border-outline-variant rounded-2xl p-5 shadow-sm"
+                  className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm"
                 >
                   <div className="flex justify-between items-start gap-3">
                     {editando ? (
@@ -158,7 +158,7 @@ export function LotesLista({
                           value={nichoTemp}
                           onChange={(e) => setNichoTemp(e.target.value)}
                           disabled={pending}
-                          className="input bg-white py-1.5 w-auto"
+                          className="input bg-surface-container-lowest py-1.5 w-auto"
                         >
                           {/* nicho atual sempre disponível, mesmo se não estiver na lista */}
                           {!nichos.includes(lote.nicho.trim()) && (

@@ -56,12 +56,12 @@ export function FinanceiroCliente({
         <CardMetrica
           titulo={`Comissão (${financeiro.percentualComissao}%)`}
           valor={formatarMoeda(financeiro.comissaoTotal)}
-          cor="text-green-700"
+          cor="text-green-400"
         />
         <CardMetrica titulo="Vendas fechadas" valor={financeiro.vendas.length} />
       </div>
 
-      <div className="bg-white border border-outline-variant rounded-2xl p-6">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-on-surface mb-3">
           Vendas fechadas no período
         </h3>
@@ -99,7 +99,7 @@ function CardMetrica({
   cor?: string;
 }) {
   return (
-    <div className="bg-white border border-outline-variant rounded-2xl p-5">
+    <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
       <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">{titulo}</p>
       <p className={`text-2xl font-bold ${cor}`}>{valor}</p>
     </div>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LeadsFiltros } from "./leads-filtros";
 import { NovoLeadBotao } from "./novo-lead-botao";
-import { STATUS_LEAD, STATUS_LABEL, STATUS_BADGE_CLASS, PRIORIDADE_COR, PRIORIDADE_LABEL } from "@/lib/status-lead";
+import { STATUS_LEAD, STATUS_LABEL, STATUS_BADGE_CLASS, PRIORIDADE_COR, PRIORIDADE_TEXTO, PRIORIDADE_LABEL } from "@/lib/status-lead";
 
 const POR_PAGINA = 20;
 
@@ -104,8 +104,8 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                 href={`/leads/${lead.id}`}
                 className={
                   inativo
-                    ? "block bg-amber-50 border border-amber-300 rounded-xl p-4"
-                    : "block bg-white border border-outline-variant rounded-xl p-4"
+                    ? "block bg-amber-400/10 border border-amber-400/50 rounded-xl p-4"
+                    : "block bg-surface-container-lowest border border-outline-variant rounded-xl p-4"
                 }
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -152,7 +152,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
         </div>
 
         {/* Tabela desktop */}
-        <div className="hidden lg:block bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm mt-6">
+        <div className="hidden lg:block bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm mt-6">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-surface-container-low border-b border-outline-variant">
@@ -193,7 +193,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                       key={lead.id}
                       className={
                         inativo
-                          ? "border-l-4 border-l-amber-500 bg-amber-50 hover:bg-amber-100 transition-colors"
+                          ? "border-l-4 border-l-amber-500 bg-amber-400/10 hover:bg-amber-400/20 transition-colors"
                           : "hover:bg-surface-container transition-colors"
                       }
                     >
@@ -209,7 +209,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                       </td>
                       <td className="p-0">
                         <Link href={`/leads/${lead.id}`} className="block px-6 py-3">
-                          <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[11px] font-bold rounded uppercase">
+                          <span className="inline-block px-2.5 py-1 bg-primary/15 text-primary border border-primary/25 text-[11px] font-bold rounded-md uppercase leading-tight">
                             {lead.nicho}
                           </span>
                         </Link>
@@ -217,7 +217,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                       <td className="p-0">
                         <Link href={`/leads/${lead.id}`} className="block px-6 py-3">
                           <span
-                            className={`px-2 py-0.5 text-[11px] font-bold rounded uppercase ${STATUS_BADGE_CLASS[lead.status as keyof typeof STATUS_BADGE_CLASS]}`}
+                            className={`inline-block px-2.5 py-1 text-[11px] font-bold rounded-md uppercase leading-tight whitespace-nowrap ${STATUS_BADGE_CLASS[lead.status as keyof typeof STATUS_BADGE_CLASS]}`}
                           >
                             {STATUS_LABEL[lead.status as keyof typeof STATUS_LABEL] ?? lead.status}
                           </span>
@@ -230,7 +230,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                               <div
                                 className={`w-2.5 h-2.5 rounded-full ${PRIORIDADE_COR[lead.prioridade]}`}
                               />
-                              <span className="text-sm">
+                              <span className={`text-sm font-semibold ${PRIORIDADE_TEXTO[lead.prioridade]}`}>
                                 {PRIORIDADE_LABEL[lead.prioridade]}
                               </span>
                             </div>
@@ -322,7 +322,7 @@ function Paginacao({
       <a
         href={pagina > 1 ? hrefPagina(pagina - 1) : undefined}
         aria-disabled={pagina <= 1}
-        className="px-3 py-1.5 border border-outline-variant bg-white text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors aria-disabled:opacity-50 aria-disabled:pointer-events-none"
+        className="px-3 py-1.5 border border-outline-variant bg-surface-container-lowest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors aria-disabled:opacity-50 aria-disabled:pointer-events-none"
       >
         <span className="material-symbols-outlined text-lg">chevron_left</span>
       </a>
@@ -332,7 +332,7 @@ function Paginacao({
       <a
         href={pagina < totalPaginas ? hrefPagina(pagina + 1) : undefined}
         aria-disabled={pagina >= totalPaginas}
-        className="px-3 py-1.5 border border-outline-variant bg-white text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors aria-disabled:opacity-50 aria-disabled:pointer-events-none"
+        className="px-3 py-1.5 border border-outline-variant bg-surface-container-lowest text-on-surface-variant rounded-lg hover:bg-surface-container-high transition-colors aria-disabled:opacity-50 aria-disabled:pointer-events-none"
       >
         <span className="material-symbols-outlined text-lg">chevron_right</span>
       </a>

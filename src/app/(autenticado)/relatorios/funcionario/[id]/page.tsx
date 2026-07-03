@@ -54,7 +54,7 @@ export default async function FuncionarioDetalhePage({
 
       <div className="p-4 lg:p-8 max-w-4xl mx-auto w-full space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border border-outline-variant rounded-2xl p-5">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
             <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">
               Total vendido
             </p>
@@ -62,15 +62,15 @@ export default async function FuncionarioDetalhePage({
               {formatarMoeda(dados.valorTotalVendas)}
             </p>
           </div>
-          <div className="bg-white border border-outline-variant rounded-2xl p-5">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
             <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">
               Comissão ({dados.percentualComissao}%)
             </p>
-            <p className="text-2xl font-bold text-green-700">
+            <p className="text-2xl font-bold text-green-400">
               {formatarMoeda(dados.comissaoTotal)}
             </p>
           </div>
-          <div className="bg-white border border-outline-variant rounded-2xl p-5">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5">
             <p className="text-xs font-semibold uppercase text-on-surface-variant mb-1">
               Vendas fechadas
             </p>
@@ -78,7 +78,7 @@ export default async function FuncionarioDetalhePage({
           </div>
         </div>
 
-        <div className="bg-white border border-outline-variant rounded-2xl p-6">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6">
           <h3 className="text-sm font-semibold text-on-surface mb-3">Vendas no período</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[500px]">
