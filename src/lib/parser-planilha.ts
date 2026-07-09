@@ -26,16 +26,64 @@ function limitarTamanho(valor: string): string {
   return valor.slice(0, TAMANHO_MAXIMO_CAMPO);
 }
 
+// Valores que as planilhas usam para dizer "sem dado". Precisam virar null,
+// senão viram texto literal e colidem entre si na checagem de duplicidade
+// (ex: dezenas de leads com instagram = "Não encontrado").
+const VALORES_VAZIOS = [
+  "não encontrado",
+  "nao encontrado",
+  "não informado",
+  "nao informado",
+  "não possui",
+  "nao possui",
+  "não tem",
+  "nao tem",
+  "n/a",
+  "na",
+  "-",
+  "--",
+  "—",
+];
+
+function ehValorVazio(texto: string): boolean {
+  const t = texto.trim().toLowerCase();
+  if (!t) return true;
+  return VALORES_VAZIOS.some((v) => t === v || t.startsWith(`${v} `));
+}
+
 function textoOuNulo(valor: unknown): string | null {
   const texto = String(valor ?? "").trim();
-  if (!texto || texto.toLowerCase() === "não informado") return null;
+  if (ehValorVazio(texto)) return null;
   return limitarTamanho(texto);
 }
 
 function normalizarTelefone(valor: unknown): string | null {
-  const texto = String(valor ?? "").trim();
-  if (!texto || texto.toLowerCase().startsWith("não encontrado")) return null;
-  return limitarTamanho(texto);
+  return textoOuNulo(valor);
+}
+
+// Chaves canônicas para comparar duplicidade. Só o formato muda entre
+// planilhas ("(83) 99999-1111" vs "83999991111"; "@joao" vs "Joao").
+// Retorna null quando não há valor comparável.
+export function chaveTelefone(valor: string | null | undefined): string | null {
+  if (!valor) return null;
+  const digitos = valor.replace(/\D/g, "");
+  if (digitos.length < 8) return null; // ruído, não é telefone
+  // Ignora o código do país para que +55 8399... == 8399...
+  const semPais = digitos.startsWith("55") && digitos.length > 11
+    ? digitos.slice(2)
+    : digitos;
+  return semPais;
+}
+
+export function chaveInstagram(valor: string | null | undefined): string | null {
+  if (!valor) return null;
+  const limpo = valor
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//, "")
+    .replace(/^@/, "")
+    .replace(/\/+$/, "");
+  return limpo || null;
 }
 
 function normalizarScore(valor: unknown): number | null {

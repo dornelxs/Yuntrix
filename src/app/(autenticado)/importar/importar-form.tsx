@@ -234,17 +234,29 @@ export function ImportarForm({ funcionarios, nichos }: ImportarFormProps) {
           </div>
 
           {confirmState.erro && (
-            <p className="px-6 py-3 text-sm text-error bg-error-container" role="alert">
-              {confirmState.erro}
-            </p>
+            <div className="px-6 py-3 bg-error-container" role="alert">
+              <p className="text-sm text-on-error-container">{confirmState.erro}</p>
+              {confirmState.nomesDuplicados?.length ? (
+                <p className="mt-1 text-xs text-on-error-container/80">
+                  Duplicados: {confirmState.nomesDuplicados.join(", ")}
+                </p>
+              ) : null}
+            </div>
           )}
           {confirmState.sucesso && (
-            <p className="px-6 py-3 text-sm text-on-surface bg-surface-container-high" role="status">
-              {confirmState.totalImportado} leads importados com sucesso.
-              {confirmState.puladosPorDuplicata
-                ? ` ${confirmState.puladosPorDuplicata} pulados por já existirem (duplicados).`
-                : ""}
-            </p>
+            <div className="px-6 py-3 bg-surface-container-high" role="status">
+              <p className="text-sm text-on-surface">
+                {confirmState.totalImportado} leads importados com sucesso.
+                {confirmState.puladosPorDuplicata
+                  ? ` ${confirmState.puladosPorDuplicata} pulados por já existirem (duplicados).`
+                  : ""}
+              </p>
+              {confirmState.nomesDuplicados?.length ? (
+                <p className="mt-1 text-xs text-on-surface-variant">
+                  Pulados: {confirmState.nomesDuplicados.join(", ")}
+                </p>
+              ) : null}
+            </div>
           )}
 
           {leads && (

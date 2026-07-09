@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import {
   parsearPlanilha,
   validarArquivo,
+  chaveTelefone,
+  chaveInstagram,
   type LeadImportado,
 } from "@/lib/parser-planilha";
 import { enviarNotificacaoNovoLote } from "@/lib/email";
@@ -51,6 +53,8 @@ export interface ConfirmarImportacaoState {
   sucesso?: boolean;
   totalImportado?: number;
   puladosPorDuplicata?: number;
+  /** Nomes dos leads ignorados por já existirem (banco ou planilha). */
+  nomesDuplicados?: string[];
 }
 
 export async function confirmarImportacao(
@@ -96,32 +100,58 @@ export async function confirmarImportacao(
     return { erro: "Nenhum lead selecionado para importação." };
   }
 
-  const telefones = leadsValidos.map((l) => l.telefone).filter(Boolean) as string[];
-  const instagrams = leadsValidos.map((l) => l.instagram).filter(Boolean) as string[];
-
-  const { data: existentes } = await supabase
+  // Carrega as chaves já existentes. A base é pequena (uma agência), então
+  // buscar as duas colunas inteiras é mais simples e seguro do que montar um
+  // filtro `.or()` com telefones que contêm vírgulas e parênteses.
+  const { data: existentes, error: erroExistentes } = await supabase
     .from("leads")
-    .select("telefone, instagram")
-    .or(
-      [
-        telefones.length ? `telefone.in.(${telefones.map((t) => `"${t}"`).join(",")})` : null,
-        instagrams.length ? `instagram.in.(${instagrams.map((i) => `"${i}"`).join(",")})` : null,
-      ]
-        .filter(Boolean)
-        .join(",")
-    );
+    .select("telefone, instagram");
 
-  const telefonesExistentes = new Set((existentes ?? []).map((e) => e.telefone).filter(Boolean));
-  const instagramsExistentes = new Set((existentes ?? []).map((e) => e.instagram).filter(Boolean));
+  if (erroExistentes) {
+    return { erro: "Não foi possível verificar duplicados. Tente novamente." };
+  }
 
-  const leadsNovos = leadsValidos.filter(
-    (l) =>
-      !(l.telefone && telefonesExistentes.has(l.telefone)) &&
-      !(l.instagram && instagramsExistentes.has(l.instagram))
+  const telefonesExistentes = new Set(
+    (existentes ?? []).map((e) => chaveTelefone(e.telefone)).filter(Boolean) as string[]
+  );
+  const instagramsExistentes = new Set(
+    (existentes ?? []).map((e) => chaveInstagram(e.instagram)).filter(Boolean) as string[]
   );
 
+  // Um lead é duplicado se casar por telefone OU por instagram. Campos vazios
+  // nunca casam — só comparamos quando os dois lados têm valor.
+  const leadsNovos: LeadImportado[] = [];
+  const duplicados: string[] = [];
+  // Também deduplica dentro da própria planilha (linhas repetidas no arquivo).
+  const telefonesDaPlanilha = new Set<string>();
+  const instagramsDaPlanilha = new Set<string>();
+
+  for (const lead of leadsValidos) {
+    const tel = chaveTelefone(lead.telefone);
+    const insta = chaveInstagram(lead.instagram);
+
+    const jaNoBanco =
+      (tel !== null && telefonesExistentes.has(tel)) ||
+      (insta !== null && instagramsExistentes.has(insta));
+    const jaNaPlanilha =
+      (tel !== null && telefonesDaPlanilha.has(tel)) ||
+      (insta !== null && instagramsDaPlanilha.has(insta));
+
+    if (jaNoBanco || jaNaPlanilha) {
+      duplicados.push(lead.nome);
+      continue;
+    }
+
+    if (tel) telefonesDaPlanilha.add(tel);
+    if (insta) instagramsDaPlanilha.add(insta);
+    leadsNovos.push(lead);
+  }
+
   if (leadsNovos.length === 0) {
-    return { erro: "Todos os leads selecionados já existem no banco (duplicados por telefone/instagram)." };
+    return {
+      erro: `Todos os ${leadsValidos.length} leads selecionados já existem no banco (duplicados por telefone/Instagram).`,
+      nomesDuplicados: duplicados,
+    };
   }
 
   const { data: batch, error: erroBatch } = await supabase
@@ -190,7 +220,8 @@ export async function confirmarImportacao(
   return {
     sucesso: true,
     totalImportado: linhasParaInserir.length,
-    puladosPorDuplicata: leadsValidos.length - leadsNovos.length,
+    puladosPorDuplicata: duplicados.length,
+    nomesDuplicados: duplicados,
   };
 }
 
