@@ -72,13 +72,15 @@ export default async function ImportarPage({ searchParams }: ImportarPageProps) 
             Planilhas importadas
           </h2>
           <p className="text-sm text-on-surface-variant mb-5">
-            Separadas por data e nicho. Se um lote subiu com o nicho errado,
-            use &quot;Alterar nicho&quot; para corrigir o lote e todos os seus leads de
-            uma vez.
+            Separadas por data e nicho. Use &quot;Alterar nicho&quot; para corrigir um lote
+            que subiu com o nicho errado, ou &quot;Reatribuir&quot; para passar a planilha
+            inteira para outro funcionário — em ambos os casos todos os leads do
+            lote são atualizados de uma vez.
           </p>
           <LotesLista
             lotes={lotes}
             nichos={nichos}
+            funcionarios={funcionarios}
             dataSelecionada={filtroData}
             hoje={hojeLocal()}
           />

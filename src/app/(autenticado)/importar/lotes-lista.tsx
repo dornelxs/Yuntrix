@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { alterarNichoLote, type LoteImportado } from "./actions";
+import { alterarNichoLote, reatribuirLote, type LoteImportado } from "./actions";
 
 function rotuloData(ymd: string): string {
   const [ano, mes, dia] = ymd.split("-").map(Number);
@@ -16,17 +16,22 @@ function rotuloData(ymd: string): string {
 export function LotesLista({
   lotes,
   nichos,
+  funcionarios,
   dataSelecionada,
   hoje,
 }: {
   lotes: LoteImportado[];
   nichos: string[];
+  funcionarios: { id: string; nome: string }[];
   dataSelecionada: string | null;
   hoje: string;
 }) {
   const router = useRouter();
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [nichoTemp, setNichoTemp] = useState("");
+  // Reatribuição do lote para outro funcionário (independente da edição de nicho).
+  const [reatribuindoId, setReatribuindoId] = useState<string | null>(null);
+  const [funcionarioTemp, setFuncionarioTemp] = useState("");
   const [pending, startTransition] = useTransition();
 
   const mostrandoTodos = dataSelecionada === null;
@@ -50,6 +55,42 @@ export function LotesLista({
   function iniciarEdicao(lote: LoteImportado) {
     setEditandoId(lote.id);
     setNichoTemp(lote.nicho.trim());
+  }
+
+  function iniciarReatribuicao(lote: LoteImportado) {
+    setReatribuindoId(lote.id);
+    setFuncionarioTemp(lote.atribuidoA ?? "");
+  }
+
+  function cancelarReatribuicao() {
+    setReatribuindoId(null);
+    setFuncionarioTemp("");
+  }
+
+  function salvarReatribuicao(lote: LoteImportado) {
+    if (!funcionarioTemp || funcionarioTemp === lote.atribuidoA) {
+      cancelarReatribuicao();
+      return;
+    }
+    const nomeDestino =
+      funcionarios.find((f) => f.id === funcionarioTemp)?.nome ?? "outro funcionário";
+    if (
+      !confirm(
+        `Passar esta planilha (${lote.total_leads} leads) para ${nomeDestino}? ` +
+          `Todos os leads do lote mudam de responsável, mantendo status e histórico.`
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const r = await reatribuirLote(lote.id, funcionarioTemp);
+      if (r.erro) {
+        alert(r.erro);
+        return;
+      }
+      cancelarReatribuicao();
+      router.refresh();
+    });
   }
 
   function cancelar() {
@@ -208,10 +249,53 @@ export function LotesLista({
                       <span className="material-symbols-outlined text-base">group</span>
                       {lote.total_leads} leads
                     </p>
-                    <p className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-base">person</span>
-                      {lote.responsavelNome ?? "Sem responsável"}
-                    </p>
+                    {reatribuindoId === lote.id ? (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="material-symbols-outlined text-base">person</span>
+                        <select
+                          autoFocus
+                          value={funcionarioTemp}
+                          onChange={(e) => setFuncionarioTemp(e.target.value)}
+                          disabled={pending}
+                          className="input bg-surface-container-lowest py-1.5 w-auto"
+                        >
+                          <option value="">Selecione...</option>
+                          {funcionarios.map((f) => (
+                            <option key={f.id} value={f.id}>
+                              {f.nome}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => salvarReatribuicao(lote)}
+                          disabled={pending}
+                          className="btn btn-primary btn-sm"
+                        >
+                          {pending ? "Movendo..." : "Mover"}
+                        </button>
+                        <button
+                          onClick={cancelarReatribuicao}
+                          disabled={pending}
+                          className="btn btn-ghost btn-sm"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="material-symbols-outlined text-base">person</span>
+                        {lote.responsavelNome ?? "Sem responsável"}
+                        <button
+                          onClick={() => iniciarReatribuicao(lote)}
+                          className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            swap_horiz
+                          </span>
+                          Reatribuir
+                        </button>
+                      </div>
+                    )}
                     {lote.arquivo_origem && (
                       <p className="flex items-center gap-2 min-w-0">
                         <span className="material-symbols-outlined text-base shrink-0">

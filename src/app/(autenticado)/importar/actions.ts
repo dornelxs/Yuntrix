@@ -249,6 +249,7 @@ export interface LoteImportado {
   total_leads: number;
   arquivo_origem: string | null;
   criado_em: string;
+  atribuidoA: string | null;
   responsavelNome: string | null;
 }
 
@@ -259,7 +260,7 @@ export async function listarLotes(dia?: string | null): Promise<LoteImportado[]>
   let query = supabase
     .from("import_batches")
     .select(
-      "id, nicho, data_prospeccao, total_leads, arquivo_origem, criado_em, users:atribuido_a(nome)"
+      "id, nicho, data_prospeccao, total_leads, arquivo_origem, criado_em, atribuido_a, users:atribuido_a(nome)"
     )
     .order("criado_em", { ascending: false });
 
@@ -276,6 +277,7 @@ export async function listarLotes(dia?: string | null): Promise<LoteImportado[]>
     total_leads: b.total_leads,
     arquivo_origem: b.arquivo_origem,
     criado_em: b.criado_em,
+    atribuidoA: b.atribuido_a,
     responsavelNome: Array.isArray(b.users)
       ? b.users[0]?.nome ?? null
       : (b.users as unknown as { nome: string } | null)?.nome ?? null,
@@ -285,6 +287,70 @@ export async function listarLotes(dia?: string | null): Promise<LoteImportado[]>
 export interface AlterarNichoState {
   erro?: string;
   sucesso?: boolean;
+}
+
+export interface ReatribuirLoteState {
+  erro?: string;
+  sucesso?: boolean;
+}
+
+/**
+ * Passa uma planilha inteira para outro funcionário: atualiza o lote E todos
+ * os leads dele. Os dois precisam mudar juntos — a RLS filtra os leads por
+ * `atribuido_a`, então sem propagar o novo responsável não veria nada.
+ * O status e o histórico dos leads são preservados.
+ */
+export async function reatribuirLote(
+  loteId: string,
+  novoFuncionarioId: string
+): Promise<ReatribuirLoteState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { erro: "Sessão expirada." };
+
+  const { data: perfil } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (perfil?.role !== "admin") {
+    return { erro: "Apenas administradores podem reatribuir planilhas." };
+  }
+
+  const { data: destino } = await supabase
+    .from("users")
+    .select("id, role, ativo")
+    .eq("id", novoFuncionarioId)
+    .single();
+
+  if (!destino || destino.role !== "funcionario" || !destino.ativo) {
+    return { erro: "Selecione um funcionário ativo." };
+  }
+
+  const { error: erroLote } = await supabase
+    .from("import_batches")
+    .update({ atribuido_a: novoFuncionarioId })
+    .eq("id", loteId);
+  if (erroLote) return { erro: "Não foi possível reatribuir a planilha." };
+
+  const { error: erroLeads } = await supabase
+    .from("leads")
+    .update({ atribuido_a: novoFuncionarioId })
+    .eq("batch_id", loteId);
+  if (erroLeads) {
+    return {
+      erro: "Planilha reatribuída, mas houve erro ao mover os leads. Tente novamente.",
+    };
+  }
+
+  revalidatePath("/importar");
+  revalidatePath("/dashboard");
+  revalidatePath("/leads");
+  revalidatePath("/relatorios");
+  return { sucesso: true };
 }
 
 // Troca o nicho de um lote inteiro numa única operação: atualiza o
