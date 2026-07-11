@@ -8,6 +8,11 @@ import {
   type StatusLead,
 } from "@/lib/status-lead";
 import {
+  extrairTelefones,
+  extrairInstagram,
+  contextoRestante,
+} from "@/lib/contato";
+import {
   atualizarStatusLead,
   adicionarNota,
   excluirNota,
@@ -51,12 +56,6 @@ const ICONE_STATUS: Record<StatusLead, string> = {
   sem_interesse: "cancel",
 };
 
-function whatsappLink(telefone: string): string | null {
-  const digitos = telefone.replace(/\D/g, "");
-  if (digitos.length < 10) return null;
-  const comCodigoPais = digitos.startsWith("55") ? digitos : `55${digitos}`;
-  return `https://wa.me/${comCodigoPais}`;
-}
 
 function formatarData(iso: string): string {
   return new Date(iso).toLocaleString("pt-BR", {
@@ -160,7 +159,21 @@ export function DetalheLeadCliente({
     setTimeout(() => setCopiado(null), 2000);
   }
 
-  const link = lead.telefone ? whatsappLink(lead.telefone) : null;
+  // Os campos da planilha misturam contato e contexto ("(83) 9... (Cabedelo)",
+  // "@handle — ~4.186 seguidores"). Extraímos o contato real e guardamos o
+  // resto como detalhe, em vez de tentar montar o link com o campo inteiro.
+  const telefones = extrairTelefones(lead.telefone);
+  const instagram = extrairInstagram(lead.instagram);
+
+  const contextoContato = [
+    contextoRestante(
+      lead.telefone ?? "",
+      telefones.map((t) => t.exibicao)
+    ),
+    contextoRestante(lead.instagram ?? "", instagram ? [instagram.exibicao] : []),
+  ]
+    .filter(Boolean)
+    .join(" · ") || null;
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -185,32 +198,86 @@ export function DetalheLeadCliente({
               {lead.especialidade ?? "—"} — Nicho:{" "}
               <span className="font-semibold text-primary">{lead.nicho}</span>
             </p>
-            <div className="flex gap-2 mt-2">
-              {link && (
-                <a
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 bg-green-500/15 text-green-400 rounded-full text-xs font-semibold flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-base">chat</span>
-                  WhatsApp
-                </a>
-              )}
-              {lead.instagram && (
-                <a
-                  href={`https://instagram.com/${lead.instagram.replace("@", "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1 bg-pink-500/15 text-pink-400 rounded-full text-xs font-semibold flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-base">photo_camera</span>
-                  Instagram
-                </a>
-              )}
-            </div>
           </div>
         </div>
+
+        {(telefones.length > 0 || instagram) && (
+          <section className="space-y-2">
+            <h2 className="text-xs font-semibold uppercase text-on-surface-variant">
+              Contato
+            </h2>
+
+            {telefones.map((tel, i) => (
+              <div
+                key={`tel-${i}`}
+                className="flex items-center gap-2 flex-wrap bg-surface-container-low rounded-lg px-3 py-2"
+              >
+                <span className="material-symbols-outlined text-green-400 text-lg">call</span>
+                <span className="text-sm font-semibold text-on-surface">{tel.exibicao}</span>
+
+                {tel.incompleto ? (
+                  <span className="text-xs text-amber-400">
+                    número incompleto na planilha
+                  </span>
+                ) : (
+                  <>
+                    <a
+                      href={tel.linkWhatsapp!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 bg-green-500/15 text-green-400 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-green-500/25 active:scale-95 transition-all"
+                    >
+                      <span className="material-symbols-outlined text-base">chat</span>
+                      WhatsApp
+                    </a>
+                    <button
+                      onClick={() => copiar(tel.exibicao, `tel-${i}`)}
+                      aria-label="Copiar telefone"
+                      className="btn-icon p-1.5"
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        {copiado === `tel-${i}` ? "check" : "content_copy"}
+                      </span>
+                    </button>
+                  </>
+                )}
+              </div>
+            ))}
+
+            {instagram && (
+              <div className="flex items-center gap-2 flex-wrap bg-surface-container-low rounded-lg px-3 py-2">
+                <span className="material-symbols-outlined text-pink-400 text-lg">
+                  photo_camera
+                </span>
+                <span className="text-sm font-semibold text-on-surface">
+                  {instagram.exibicao}
+                </span>
+                <a
+                  href={instagram.linkPerfil}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1 bg-pink-500/15 text-pink-400 rounded-full text-xs font-semibold flex items-center gap-1 hover:bg-pink-500/25 active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-base">open_in_new</span>
+                  Abrir perfil
+                </a>
+                <button
+                  onClick={() => copiar(instagram.exibicao, "insta")}
+                  aria-label="Copiar Instagram"
+                  className="btn-icon p-1.5"
+                >
+                  <span className="material-symbols-outlined text-base">
+                    {copiado === "insta" ? "check" : "content_copy"}
+                  </span>
+                </button>
+              </div>
+            )}
+
+            {contextoContato && (
+              <p className="text-xs text-on-surface-variant px-1">{contextoContato}</p>
+            )}
+          </section>
+        )}
 
         <section>
           <h2 className="text-xs font-semibold uppercase text-on-surface-variant mb-2">

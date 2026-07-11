@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LeadsFiltros } from "./leads-filtros";
 import { NovoLeadBotao } from "./novo-lead-botao";
 import { STATUS_LEAD, STATUS_LABEL, STATUS_BADGE_CLASS, PRIORIDADE_COR, PRIORIDADE_TEXTO, PRIORIDADE_LABEL } from "@/lib/status-lead";
+import { resumoContato } from "@/lib/contato";
 
 const POR_PAGINA = 20;
 
@@ -115,7 +116,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                   <div className="min-w-0">
                     <p className="font-semibold text-on-surface text-sm truncate">{lead.nome}</p>
                     <p className="text-xs text-on-surface-variant truncate">
-                      {lead.telefone ?? lead.instagram ?? "—"}
+                      {resumoContato(lead.telefone, lead.instagram)}
                     </p>
                   </div>
                 </div>
@@ -251,7 +252,7 @@ export default async function LeadsPage({ searchParams }: LeadsPageProps) {
                           href={`/leads/${lead.id}`}
                           className="block px-6 py-3 text-sm text-on-surface-variant"
                         >
-                          {lead.telefone ?? lead.instagram ?? "—"}
+                          {resumoContato(lead.telefone, lead.instagram)}
                         </Link>
                       </td>
                       <td className="p-0">
