@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { calcularFunil } from "@/lib/metricas";
 import { DesempenhoCliente } from "./desempenho-cliente";
 
 interface DesempenhoPageProps {
@@ -39,15 +40,17 @@ export default async function DesempenhoPage({ searchParams }: DesempenhoPagePro
     .gte("criado_em", inicioPeriodo)
     .order("criado_em", { ascending: false });
 
-  const { count: leadsAtribuidos } = await supabase
+  // Coorte: os leads do usuário que entraram no período. O funil sai do
+  // status ATUAL deles (ver lib/metricas.ts). Antes as conversões vinham de
+  // eventos do período mas eram divididas por TODOS os leads já atribuídos —
+  // janelas diferentes, taxa sempre distorcida.
+  const { data: leadsDoPeriodo } = await supabase
     .from("leads")
-    .select("id", { count: "exact", head: true })
-    .eq("atribuido_a", user.id);
+    .select("status")
+    .eq("atribuido_a", user.id)
+    .gte("criado_em", inicioPeriodo);
 
-  const mudancasStatus = (atividades ?? []).filter((a) => a.tipo === "mudanca_status");
-  const contatados = mudancasStatus.filter((a) => a.status_novo === "contatado").length;
-  const interessados = mudancasStatus.filter((a) => a.status_novo === "interessado").length;
-  const fechados = mudancasStatus.filter((a) => a.status_novo === "fechado").length;
+  const funil = calcularFunil(leadsDoPeriodo ?? []);
 
   const { count: leadsInativos } = await supabase
     .from("leads")
@@ -67,12 +70,12 @@ export default async function DesempenhoPage({ searchParams }: DesempenhoPagePro
         <DesempenhoCliente
           periodo={periodo}
           metricas={{
-            leadsAtribuidos: leadsAtribuidos ?? 0,
-            contatados,
-            interessados,
-            fechados,
+            leadsAtribuidos: funil.total,
+            contatados: funil.contatados,
+            interessados: funil.interessados,
+            fechados: funil.fechados,
             leadsInativos: leadsInativos ?? 0,
-            taxaConversao: leadsAtribuidos ? (fechados / leadsAtribuidos) * 100 : 0,
+            taxaConversao: funil.taxaConversao,
           }}
           atividadesRecentes={(atividades ?? []).slice(0, 20).map((a) => ({
             tipo: a.tipo,

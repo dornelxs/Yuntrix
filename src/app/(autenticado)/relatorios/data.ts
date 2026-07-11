@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { calcularFunil } from "@/lib/metricas";
 
 export type Periodo = "semanal" | "mensal" | "personalizado";
 
@@ -24,27 +25,29 @@ export function calcularIntervalo(
 export async function buscarVisaoGeral(inicio: string, fim: string) {
   const supabase = await createClient();
 
-  const [{ count: totalLeads }, { data: atividades }, { data: nichos }] = await Promise.all([
+  // Coorte: os leads importados no período. O funil sai do status ATUAL
+  // deles (ver lib/metricas.ts), não de eventos — assim um lead marcado
+  // como fechado por engano e depois revertido não conta como conversão.
+  const [{ data: leadsPeriodo }, { data: atividades }] = await Promise.all([
     supabase
       .from("leads")
-      .select("id", { count: "exact", head: true })
+      .select("status, nicho")
       .gte("criado_em", inicio)
       .lte("criado_em", fim),
+    // Só para o tempo médio até o 1º contato, que depende do histórico.
     supabase
       .from("lead_activities")
-      .select("tipo, status_novo, criado_em, lead_id, leads:lead_id(criado_em)")
+      .select("status_novo, criado_em, lead_id, leads:lead_id(criado_em)")
       .eq("tipo", "mudanca_status")
+      .eq("status_novo", "contatado")
       .gte("criado_em", inicio)
       .lte("criado_em", fim),
-    supabase.from("leads").select("nicho").gte("criado_em", inicio).lte("criado_em", fim),
   ]);
 
-  const contatos = (atividades ?? []).filter((a) => a.status_novo === "contatado").length;
-  const fechados = (atividades ?? []).filter((a) => a.status_novo === "fechado").length;
-  const nichosAtivos = new Set((nichos ?? []).map((n) => n.nicho)).size;
+  const funil = calcularFunil(leadsPeriodo ?? []);
+  const nichosAtivos = new Set((leadsPeriodo ?? []).map((l) => l.nicho)).size;
 
   const temposContato = (atividades ?? [])
-    .filter((a) => a.status_novo === "contatado")
     .map((a) => {
       const lead = Array.isArray(a.leads) ? a.leads[0] : (a.leads as unknown as { criado_em: string } | null);
       if (!lead) return null;
@@ -58,10 +61,10 @@ export async function buscarVisaoGeral(inicio: string, fim: string) {
       : 0;
 
   return {
-    totalLeads: totalLeads ?? 0,
-    totalContatos: contatos,
-    totalConversoes: fechados,
-    taxaConversaoGeral: totalLeads ? (fechados / totalLeads) * 100 : 0,
+    totalLeads: funil.total,
+    totalContatos: funil.contatados,
+    totalConversoes: funil.fechados,
+    taxaConversaoGeral: funil.taxaConversao,
     tempoMedioContatoHoras: tempoMedioContato,
     nichosAtivos,
   };
@@ -76,21 +79,25 @@ export async function buscarConversaoPorNicho(inicio: string, fim: string) {
     .gte("criado_em", inicio)
     .lte("criado_em", fim);
 
-  const mapa = new Map<string, { total: number; contatados: number; fechados: number }>();
+  // Agrupa os leads do período por nicho e aplica a mesma regra de funil.
+  const porNicho = new Map<string, { status: string | null }[]>();
   (leads ?? []).forEach((l) => {
-    const atual = mapa.get(l.nicho) ?? { total: 0, contatados: 0, fechados: 0 };
-    atual.total += 1;
-    if (l.status !== "sem_contato") atual.contatados += 1;
-    if (l.status === "fechado") atual.fechados += 1;
-    mapa.set(l.nicho, atual);
+    const lista = porNicho.get(l.nicho) ?? [];
+    lista.push({ status: l.status });
+    porNicho.set(l.nicho, lista);
   });
 
-  return Array.from(mapa.entries())
-    .map(([nicho, dados]) => ({
-      nicho,
-      ...dados,
-      taxaConversao: dados.total ? (dados.fechados / dados.total) * 100 : 0,
-    }))
+  return Array.from(porNicho.entries())
+    .map(([nicho, leadsDoNicho]) => {
+      const funil = calcularFunil(leadsDoNicho);
+      return {
+        nicho,
+        total: funil.total,
+        contatados: funil.contatados,
+        fechados: funil.fechados,
+        taxaConversao: funil.taxaConversao,
+      };
+    })
     .sort((a, b) => b.total - a.total);
 }
 
@@ -105,32 +112,31 @@ export async function buscarPerformancePorFuncionario(inicio: string, fim: strin
 
   const resultados = await Promise.all(
     (funcionarios ?? []).map(async (f) => {
-      const [{ count: atribuidos }, { data: atividades }, { count: naoTrabalhados }] =
-        await Promise.all([
-          supabase
-            .from("leads")
-            .select("id", { count: "exact", head: true })
-            .eq("atribuido_a", f.id)
-            .gte("criado_em", inicio)
-            .lte("criado_em", fim),
-          supabase
-            .from("lead_activities")
-            .select("status_novo, criado_em, lead_id, leads:lead_id(criado_em)")
-            .eq("user_id", f.id)
-            .eq("tipo", "mudanca_status")
-            .gte("criado_em", inicio)
-            .lte("criado_em", fim),
-          supabase
-            .from("leads")
-            .select("id", { count: "exact", head: true })
-            .eq("atribuido_a", f.id)
-            .eq("status", "sem_contato")
-            .gte("criado_em", inicio)
-            .lte("criado_em", fim),
-        ]);
+      // Coorte do funcionário: leads atribuídos a ele que entraram no período.
+      // O funil vem do status ATUAL desses leads, não de eventos.
+      const [{ data: leadsDoFuncionario }, { data: atividades }] = await Promise.all([
+        supabase
+          .from("leads")
+          .select("status")
+          .eq("atribuido_a", f.id)
+          .gte("criado_em", inicio)
+          .lte("criado_em", fim),
+        supabase
+          .from("lead_activities")
+          .select("status_novo, criado_em, lead_id, leads:lead_id(criado_em)")
+          .eq("user_id", f.id)
+          .eq("tipo", "mudanca_status")
+          .gte("criado_em", inicio)
+          .lte("criado_em", fim),
+      ]);
 
+      const funil = calcularFunil(leadsDoFuncionario ?? []);
+      const atribuidos = funil.total;
+      const conversoes = funil.fechados;
+      const naoTrabalhados = funil.semContato;
+      // Esforço: quantos leads distintos ele mexeu no período (baseado em
+      // atividade mesmo — é o que mede trabalho, não resultado).
       const leadsTrabalhados = new Set((atividades ?? []).map((a) => a.lead_id)).size;
-      const conversoes = (atividades ?? []).filter((a) => a.status_novo === "fechado").length;
 
       const temposContato = (atividades ?? [])
         .filter((a) => a.status_novo === "contatado")
@@ -149,11 +155,11 @@ export async function buscarPerformancePorFuncionario(inicio: string, fim: strin
       return {
         id: f.id,
         nome: f.nome,
-        leadsAtribuidos: atribuidos ?? 0,
+        leadsAtribuidos: atribuidos,
         leadsTrabalhados,
-        leadsNaoTrabalhados: naoTrabalhados ?? 0,
+        leadsNaoTrabalhados: naoTrabalhados,
         conversoes,
-        taxaConversao: atribuidos ? (conversoes / atribuidos) * 100 : 0,
+        taxaConversao: funil.taxaConversao,
         tempoMedioContatoHoras: tempoMedioContato,
       };
     })
