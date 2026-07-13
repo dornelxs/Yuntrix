@@ -251,6 +251,8 @@ export interface LoteImportado {
   criado_em: string;
   atribuidoA: string | null;
   responsavelNome: string | null;
+  /** Leads do lote que já saíram de "sem contato" — o que se perde ao excluir. */
+  leadsTrabalhados: number;
 }
 
 // Passe uma data YYYY-MM-DD para trazer só os lotes daquele dia de prospecção.
@@ -269,8 +271,30 @@ export async function listarLotes(dia?: string | null): Promise<LoteImportado[]>
   }
 
   const { data } = await query;
+  const lotes = data ?? [];
 
-  return (data ?? []).map((b) => ({
+  // Quantos leads de cada lote já saíram de "sem contato" — é o que o admin
+  // perde ao excluir a planilha, então precisa aparecer antes de confirmar.
+  const trabalhadosPorLote = new Map<string, number>();
+  if (lotes.length > 0) {
+    const { data: leadsDosLotes } = await supabase
+      .from("leads")
+      .select("batch_id, status")
+      .in(
+        "batch_id",
+        lotes.map((b) => b.id)
+      );
+
+    for (const lead of leadsDosLotes ?? []) {
+      if (!lead.batch_id || lead.status === "sem_contato") continue;
+      trabalhadosPorLote.set(
+        lead.batch_id,
+        (trabalhadosPorLote.get(lead.batch_id) ?? 0) + 1
+      );
+    }
+  }
+
+  return lotes.map((b) => ({
     id: b.id,
     nicho: b.nicho,
     data_prospeccao: b.data_prospeccao,
@@ -281,6 +305,7 @@ export async function listarLotes(dia?: string | null): Promise<LoteImportado[]>
     responsavelNome: Array.isArray(b.users)
       ? b.users[0]?.nome ?? null
       : (b.users as unknown as { nome: string } | null)?.nome ?? null,
+    leadsTrabalhados: trabalhadosPorLote.get(b.id) ?? 0,
   }));
 }
 
@@ -292,6 +317,96 @@ export interface AlterarNichoState {
 export interface ReatribuirLoteState {
   erro?: string;
   sucesso?: boolean;
+}
+
+export interface ExcluirLoteState {
+  erro?: string;
+  sucesso?: boolean;
+  leadsExcluidos?: number;
+}
+
+/**
+ * Apaga uma planilha e TUDO que veio dela: os leads e o histórico de
+ * atividades. Operação irreversível.
+ *
+ * As FKs são NO ACTION, então a ordem importa: primeiro as atividades,
+ * depois os leads, por último o lote. Exigimos o nome do arquivo digitado
+ * como confirmação — a maior parte dos leads costuma já estar trabalhada,
+ * e um clique errado destruiria notas, status e métricas.
+ */
+export async function excluirLote(
+  loteId: string,
+  confirmacao: string
+): Promise<ExcluirLoteState> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { erro: "Sessão expirada." };
+
+  const { data: perfil } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  if (perfil?.role !== "admin") {
+    return { erro: "Apenas administradores podem excluir planilhas." };
+  }
+
+  const { data: lote } = await supabase
+    .from("import_batches")
+    .select("id, arquivo_origem, nicho")
+    .eq("id", loteId)
+    .single();
+
+  if (!lote) return { erro: "Planilha não encontrada." };
+
+  // Trava: precisa digitar o nome do arquivo (ou o nicho, se não houver arquivo).
+  const esperado = (lote.arquivo_origem ?? lote.nicho).trim();
+  if (confirmacao.trim() !== esperado) {
+    return { erro: `Digite exatamente "${esperado}" para confirmar a exclusão.` };
+  }
+
+  const { data: leadsDoLote } = await supabase
+    .from("leads")
+    .select("id")
+    .eq("batch_id", loteId);
+
+  const idsLeads = (leadsDoLote ?? []).map((l) => l.id);
+
+  if (idsLeads.length > 0) {
+    const { error: erroAtividades } = await supabase
+      .from("lead_activities")
+      .delete()
+      .in("lead_id", idsLeads);
+    if (erroAtividades) {
+      return { erro: "Não foi possível excluir o histórico dos leads." };
+    }
+
+    const { error: erroLeads } = await supabase
+      .from("leads")
+      .delete()
+      .eq("batch_id", loteId);
+    if (erroLeads) {
+      return { erro: "Não foi possível excluir os leads da planilha." };
+    }
+  }
+
+  const { error: erroLote } = await supabase
+    .from("import_batches")
+    .delete()
+    .eq("id", loteId);
+  if (erroLote) {
+    return { erro: "Leads excluídos, mas não foi possível remover a planilha." };
+  }
+
+  revalidatePath("/importar");
+  revalidatePath("/dashboard");
+  revalidatePath("/leads");
+  revalidatePath("/relatorios");
+  revalidatePath("/nichos");
+  return { sucesso: true, leadsExcluidos: idsLeads.length };
 }
 
 /**

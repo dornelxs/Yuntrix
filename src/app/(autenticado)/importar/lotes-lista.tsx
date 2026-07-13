@@ -1,8 +1,14 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { alterarNichoLote, reatribuirLote, type LoteImportado } from "./actions";
+import {
+  alterarNichoLote,
+  reatribuirLote,
+  excluirLote,
+  type LoteImportado,
+} from "./actions";
 
 function rotuloData(ymd: string): string {
   const [ano, mes, dia] = ymd.split("-").map(Number);
@@ -32,6 +38,10 @@ export function LotesLista({
   // Reatribuição do lote para outro funcionário (independente da edição de nicho).
   const [reatribuindoId, setReatribuindoId] = useState<string | null>(null);
   const [funcionarioTemp, setFuncionarioTemp] = useState("");
+  // Exclusão: modal com trava (digitar o nome do arquivo).
+  const [loteParaExcluir, setLoteParaExcluir] = useState<LoteImportado | null>(null);
+  const [textoConfirmacao, setTextoConfirmacao] = useState("");
+  const [erroExclusao, setErroExclusao] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const mostrandoTodos = dataSelecionada === null;
@@ -55,6 +65,36 @@ export function LotesLista({
   function iniciarEdicao(lote: LoteImportado) {
     setEditandoId(lote.id);
     setNichoTemp(lote.nicho.trim());
+  }
+
+  // O texto que o admin precisa digitar para confirmar a exclusão.
+  function textoEsperado(lote: LoteImportado): string {
+    return (lote.arquivo_origem ?? lote.nicho).trim();
+  }
+
+  function abrirExclusao(lote: LoteImportado) {
+    setLoteParaExcluir(lote);
+    setTextoConfirmacao("");
+    setErroExclusao(null);
+  }
+
+  function fecharExclusao() {
+    setLoteParaExcluir(null);
+    setTextoConfirmacao("");
+    setErroExclusao(null);
+  }
+
+  function confirmarExclusao() {
+    if (!loteParaExcluir) return;
+    startTransition(async () => {
+      const r = await excluirLote(loteParaExcluir.id, textoConfirmacao);
+      if (r.erro) {
+        setErroExclusao(r.erro);
+        return;
+      }
+      fecharExclusao();
+      router.refresh();
+    });
   }
 
   function iniciarReatribuicao(lote: LoteImportado) {
@@ -242,6 +282,17 @@ export function LotesLista({
                         </button>
                       </div>
                     )}
+
+                    {!editando && reatribuindoId !== lote.id && (
+                      <button
+                        onClick={() => abrirExclusao(lote)}
+                        aria-label="Excluir planilha"
+                        title="Excluir planilha"
+                        className="btn-icon shrink-0 hover:text-error hover:bg-error-container/50"
+                      >
+                        <span className="material-symbols-outlined text-lg">delete</span>
+                      </button>
+                    )}
                   </div>
 
                   <div className="mt-4 space-y-1.5 text-sm text-on-surface-variant">
@@ -313,6 +364,82 @@ export function LotesLista({
           </div>
         </div>
       ))}
+
+      {/* Modal de exclusão — irreversível, exige digitar o nome do arquivo */}
+      {loteParaExcluir &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/60 flex items-start justify-center z-50 px-4 py-10 overflow-y-auto">
+            <div className="bg-surface-container-lowest rounded-2xl p-6 w-full max-w-md shadow-lg my-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-error">Excluir planilha</h3>
+                <button onClick={fecharExclusao} aria-label="Fechar" className="btn-icon">
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <div className="space-y-3 text-sm">
+                <p className="text-on-surface">
+                  Isso apaga a planilha,{" "}
+                  <strong>
+                    {loteParaExcluir.total_leads}{" "}
+                    {loteParaExcluir.total_leads === 1 ? "lead" : "leads"}
+                  </strong>{" "}
+                  e todo o histórico deles (notas e mudanças de status).
+                </p>
+
+                {loteParaExcluir.leadsTrabalhados > 0 && (
+                  <p className="bg-error-container/40 border border-error/40 rounded-lg px-3 py-2 text-on-error-container">
+                    <strong>{loteParaExcluir.leadsTrabalhados}</strong>{" "}
+                    {loteParaExcluir.leadsTrabalhados === 1
+                      ? "lead já foi trabalhado"
+                      : "leads já foram trabalhados"}{" "}
+                    e {loteParaExcluir.leadsTrabalhados === 1 ? "vai" : "vão"} se perder,
+                    junto com as métricas de desempenho.
+                  </p>
+                )}
+
+                <p className="text-on-surface-variant">
+                  Esta ação <strong>não pode ser desfeita</strong>. Para confirmar, digite:
+                </p>
+                <p className="font-mono text-xs bg-surface-container-high rounded px-3 py-2 break-all text-on-surface">
+                  {textoEsperado(loteParaExcluir)}
+                </p>
+
+                <input
+                  autoFocus
+                  value={textoConfirmacao}
+                  onChange={(e) => setTextoConfirmacao(e.target.value)}
+                  placeholder="Digite o nome do arquivo"
+                  disabled={pending}
+                  className="input"
+                />
+
+                {erroExclusao && <p className="text-sm text-error">{erroExclusao}</p>}
+
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={confirmarExclusao}
+                    disabled={
+                      pending ||
+                      textoConfirmacao.trim() !== textoEsperado(loteParaExcluir)
+                    }
+                    className="btn bg-error text-on-error hover:opacity-90 flex-1"
+                  >
+                    {pending ? "Excluindo..." : "Excluir definitivamente"}
+                  </button>
+                  <button
+                    onClick={fecharExclusao}
+                    disabled={pending}
+                    className="btn btn-secondary"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
